@@ -26,6 +26,8 @@ int main(int argc, char *argv[])
    struct utsname uts;
    long c_pid;
    char cmd_buf1[100];
+   char cmd_buf2[100];
+   char cmd_buf3[100];
 
    if (argc < 2) {
        fprintf(stderr, "Usage: %s <child-hostname>\n", argv[0]);
@@ -45,8 +47,15 @@ int main(int argc, char *argv[])
    pid = clone(childFunc, stackTop, CLONE_NEWUTS | SIGCHLD, argv[1]);
    
    c_pid = (long) pid;
-   snprintf(cmd_buf1, 100, "echo %ld > /sys/fs/cgroup/cpu/cpulimit_test/cgroup.procs", c_pid);
+
+   snprintf(cmd_buf1, 100, "echo %ld > /sys/fs/cgroup/cpu/cpulimit/cgroup.procs", c_pid);
    system(cmd_buf1);
+
+   snprintf(cmd_buf1, 100, "echo %ld > /sys/fs/cgroup/memory/memorylimit/cgroup.procs", c_pid);
+   system(cmd_buf2);
+
+   snprintf(cmd_buf1, 100, "echo %ld > /sys/fs/cgroup/blkio/iolimit/cgroup.procs", c_pid);
+   system(cmd_buf3);
 
    if (pid == -1)
        errExit("clone");
