@@ -13,8 +13,6 @@ static int              /* Start function for cloned child */
 childFunc(void *arg)
 {
    system("chroot capsule /bin/bash");
-   system("chroot capsule /bin/bash");
-   system("chroot capsule /bin/bash");
    return 0;           /* Child terminates now */
 }
 
@@ -26,6 +24,8 @@ int main(int argc, char *argv[])
    char *stackTop;                 /* End of stack buffer */
    pid_t pid;
    struct utsname uts;
+   long c_pid;
+   char cmd_buf1[100];
 
    if (argc < 2) {
        fprintf(stderr, "Usage: %s <child-hostname>\n", argv[0]);
@@ -43,6 +43,11 @@ int main(int argc, char *argv[])
       child commences execution in childFunc() */
 
    pid = clone(childFunc, stackTop, CLONE_NEWUTS | SIGCHLD, argv[1]);
+   
+   c_pid = (long) pid;
+   snprintf(cmd_buf1, 100, "echo %ld > /sys/fs/cgroup/cpu/cpulimit_test/cgroup.procs", c_pid);
+   system(cmd_buf1);
+
    if (pid == -1)
        errExit("clone");
    printf("clone() returned %ld\n", (long) pid);
