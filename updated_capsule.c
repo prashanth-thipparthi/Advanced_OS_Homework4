@@ -12,7 +12,14 @@
 static int              /* Start function for cloned child */
 childFunc(void *arg)
 {
-   system("sudo cgexec -g cpu,blkio,memory:container chroot capsule /bin/bash");   
+   char* arr[] = {"/bin/bash",NULL};
+
+   if (chroot("/home/sai/Dropbox/Adv_os/home_work_4/os_hw_4/capsule") != 0) {
+       perror("chroot /tmp");
+       return 1;
+   }
+
+   execv("/bin/bash", arr);
    return 0;           /* Child terminates now */
 }
 
@@ -44,8 +51,8 @@ int main(int argc, char *argv[])
    /* Create child that has its own UTS namespace;
       child commences execution in childFunc() */
 
-   pid = clone(childFunc, stackTop, CLONE_NEWPID | CLONE_NEWIPC | CLONE_NEWNET | CLONE_NEWUTS | SIGCHLD, argv[1]); // | CLONE_NEWNS
-   /*
+   pid = clone(childFunc, stackTop, CLONE_NEWPID | CLONE_NEWIPC | CLONE_NEWNET | CLONE_NEWNS | CLONE_NEWUTS | SIGCHLD, argv[1]);
+   
    c_pid = (long) pid;
 
    snprintf(cmd_buf1, 100, "echo %ld > /sys/fs/cgroup/cpu/cpulimit/cgroup.procs", c_pid);
@@ -56,7 +63,7 @@ int main(int argc, char *argv[])
 
    snprintf(cmd_buf3, 100, "echo %ld > /sys/fs/cgroup/blkio/iolimit/cgroup.procs", c_pid);
    system(cmd_buf3);
-*/
+
    if (pid == -1)
        errExit("clone");
    printf("clone() returned %ld\n", (long) pid);
