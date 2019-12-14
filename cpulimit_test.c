@@ -12,6 +12,8 @@
 static int              /* Start function for cloned child */
 childFunc(void *arg)
 {
+   printf("PID: %ld\n", (long)getpid());
+   printf("Parent PID: %ld\n", (long)getppid());
    system("sudo cgexec -g cpu,blkio,memory:container chroot capsule /bin/bash");   
    return 0;           /* Child terminates now */
 }
@@ -43,8 +45,9 @@ int main(int argc, char *argv[])
 
    /* Create child that has its own UTS namespace;
       child commences execution in childFunc() */
+   printf("pid of the main function: %d\n", getpid());
 
-   pid = clone(childFunc, stackTop, CLONE_NEWPID | CLONE_NEWIPC | CLONE_NEWNET | CLONE_NEWUTS | SIGCHLD, argv[1]); // | CLONE_NEWNS
+   pid = clone(childFunc, stackTop, CLONE_NEWPID | CLONE_NEWIPC | CLONE_NEWNET | CLONE_NEWUTS | CLONE_NEWNS | SIGCHLD, argv[1]); // | 
    /*
    c_pid = (long) pid;
 
